@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GWBMEditor – teste básico (HTML puro)</title>
+<style>
+  body { font-family: system-ui, Arial, sans-serif; max-width: 1100px; margin: 20px auto; padding: 0 14px; background: #f6f7f9; color: #222; }
+  h1 { font-size: 22px } h2 { font-size: 16px; margin: 26px 0 6px }
+  pre { background: #fff; border: 1px solid #ccd; padding: 10px; overflow: auto; white-space: pre-wrap; max-height: 260px }
+  button { padding: 6px 12px; margin: 2px; cursor: pointer }
+</style>
+</head>
+<body>
+<h1>GWBMEditor – teste básico (HTML puro, sem PHP)</h1>
+<p>Esta página não precisa de servidor: pode ser aberta direto do disco (<code>file://</code>).</p>
+
+<h2>1) Barra mínima — <code>toolbar: 'minimal'</code></h2>
+<textarea id="ed_min"><p>Editor <b>mínimo</b>.</p></textarea>
+
+<h2>2) Barra média — <code>toolbar: 'medium'</code> (inclui seletor de fonte)</h2>
+<textarea id="ed_med"><h2>Título</h2><p>Texto com <a href="https://example.com">link</a>.</p></textarea>
+
+<h2>3) Barra completa — <code>toolbar: 'full'</code></h2>
+<textarea id="ed_full"><h1>Editor completo</h1>
+<p>Clique dentro da tabela para ver o <b>menu flutuante</b> de tabela/linha/coluna/célula.</p>
+<table border="1" cellspacing="0" cellpadding="5" style="width:100%;border-collapse:collapse"><thead><tr><th>Produto</th><th>Preço</th></tr></thead><tbody><tr><td>Caneta</td><td>R$ 2,00</td></tr><tr><td>Caderno</td><td>R$ 15,00</td></tr></tbody></table>
+<p><br></p>
+<script>console.log('script preservado no HTML');</script></textarea>
+
+<h2>4) Inicialização automática por atributo — <code>data-gwbm="medium"</code></h2>
+<textarea data-gwbm="medium" data-gwbm-height="200"><p>Criado só com o atributo <code>data-gwbm</code>.</p></textarea>
+
+<p>
+  <button onclick="alert(ed_full.getData())">getData() do completo</button>
+  <button onclick="ed_full.setData('<p>setData() funcionou</p>')">setData()</button>
+  <button onclick="ed_full.insertHtml('<b>[inserido]</b>')">insertHtml()</button>
+  <button onclick="ed_full.setMode(ed_full.getMode()==='source'?'wysiwyg':'source')">Alternar código-fonte</button>
+  <button onclick="document.getElementById('saida').textContent=ed_med.getData()">Mostrar HTML do médio abaixo</button>
+</p>
+<pre id="saida"></pre>
+
+<script src="../GWBMEditor.js"></script>
+<script>
+  var ed_min  = GWBMEditor.replace('ed_min',  { toolbar: 'minimal', height: 160 });
+  var ed_med  = GWBMEditor.replace('ed_med',  { toolbar: 'medium',  height: 240 });
+  var ed_full = GWBMEditor.replace('ed_full', { toolbar: 'full',    height: 460 });
+</script>
+</body>
+</html>

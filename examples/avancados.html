@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GWBMEditor – exemplos avançados</title>
+<style>
+  body { font-family: system-ui, Arial, sans-serif; max-width: 1100px; margin: 20px auto; padding: 0 14px; background: #f6f7f9; color: #222; }
+  h1 { font-size: 22px } h2 { font-size: 17px; margin: 34px 0 4px; border-top: 2px solid #dde; padding-top: 14px }
+  p.d { margin: 0 0 8px; color: #555; font-size: 14px }
+  pre, .box { background: #fff; border: 1px solid #ccd; padding: 10px; overflow: auto; white-space: pre-wrap; max-height: 220px; font-size: 12px }
+  button { padding: 6px 12px; margin: 2px; cursor: pointer }
+  #log { height: 110px; overflow: auto; font: 12px/1.4 monospace; background: #111; color: #9f9; padding: 6px }
+  .cnt { font-size: 12px; color: #666 }
+</style>
+</head>
+<body>
+<h1>GWBMEditor – exemplos avançados</h1>
+<p class="d">Serve esta pasta por HTTP (Apache) para que o exemplo 2 (upload.php) funcione.</p>
+
+<!-- 1 -->
+<h2>1) Botões personalizados: ação simples, menu e painel</h2>
+<p class="d">Três botões criados com a opção <code>buttons</code> e usados pelo nome na barra.</p>
+<textarea id="e1"><p>Prezado(a) {{nome}}, seu pedido {{pedido}} foi confirmado.</p></textarea>
+
+<!-- 2 -->
+<h2>2) Upload de imagem para o servidor (uploadUrl) + colar/arrastar imagens</h2>
+<p class="d">Use o botão de imagem (campo “Enviar arquivo”), cole uma imagem da área de transferência ou arraste um arquivo para o editor.</p>
+<textarea id="e2"><p>Arraste uma imagem aqui.</p></textarea>
+
+<!-- 3 -->
+<h2>3) Documento HTML completo (fullPage)</h2>
+<p class="d">O <code>&lt;!DOCTYPE&gt;</code>, o <code>&lt;head&gt;</code> e os atributos de <code>&lt;html&gt;</code>/<code>&lt;body&gt;</code> são preservados; os <code>&lt;style&gt;</code> do head são aplicados na edição.</p>
+<textarea id="e3"><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Página de exemplo</title>
+<style>h1{color:#0a5;font-family:Georgia,serif}.aviso{background:#fff3cd;padding:8px}</style>
+</head>
+<body class="pagina">
+<h1>Documento completo</h1>
+<p class="aviso">O CSS do head está sendo aplicado aqui dentro.</p>
+</body>
+</html></textarea>
+<button onclick="document.getElementById('o3').textContent=e3.getData()">Ver HTML gerado</button>
+<pre id="o3"></pre>
+
+<!-- 4 -->
+<h2>4) Eventos, limite de caracteres, somente leitura e troca de barra em tempo real</h2>
+<textarea id="e4"><p>Digite até 200 caracteres.</p></textarea>
+<p>
+  <span class="cnt" id="c4"></span>
+  <button onclick="e4.setReadOnly(!e4.readOnly)">Alternar somente leitura</button>
+  <button onclick="e4.setToolbar('minimal')">Barra mínima</button>
+  <button onclick="e4.setToolbar('medium')">Barra média</button>
+  <button onclick="e4.setToolbar('full')">Barra completa</button>
+  <button onclick="e4.fullscreen()">Tela cheia</button>
+</p>
+<div id="log"></div>
+
+<!-- 5 -->
+<h2>5) Modelos próprios, CSS do site no conteúdo e tabela montada por código</h2>
+<textarea id="e5"></textarea>
+<button onclick="e5.insertHtml(e5.tableHtml(4, 3, {header:true, width:'100%', border:1, cellpadding:6, caption:'Tabela gerada por código'}))">insertHtml(tableHtml(...))</button>
+
+<!-- 6 -->
+<h2>6) Envio por AJAX (fetch), alteração pendente e visualização isolada</h2>
+<textarea id="e6"><p>Edite e clique em “Enviar via fetch”.</p></textarea>
+<button id="b6">Enviar via fetch</button> <span id="s6" class="cnt"></span>
+<p class="d">Visualização ao vivo (iframe com sandbox — scripts do conteúdo NÃO executam aqui):</p>
+<iframe id="live" sandbox style="width:100%;height:140px;border:1px solid #ccd;background:#fff"></iframe>
+
+<!-- 7 -->
+<h2>7) Vários editores, idioma inglês, tema escuro e destruição/recriação</h2>
+<textarea id="e7"><p>English UI, dark theme.</p></textarea>
+<button onclick="if(e7){e7.destroy();e7=null;}">destroy()</button>
+<button onclick="if(!e7) e7=GWBMEditor.replace('e7',{toolbar:'medium',language:'en',theme:'dark',height:200})">Recriar</button>
+
+<script src="../GWBMEditor.js"></script>
+<script>
+/* ---------------- 1: botões personalizados ---------------- */
+var e1 = GWBMEditor.replace('e1', {
+  height: 200,
+  toolbar: [
+    ['bold', 'italic', 'underline'],
+    ['variaveis', 'marca', 'carimbo'],
+    ['source']
+  ],
+  buttons: {
+    // menu suspenso: lista de itens + função apply
+    variaveis: {
+      title: 'Inserir variável', label: 'Variáveis',
+      menu: [{ v: '{{nome}}', l: 'Nome do cliente' }, { v: '{{pedido}}', l: 'Número do pedido' }, { v: '{{data}}', l: 'Data de hoje' }],
+      apply: function (ed, v) { ed.insertText(v === '{{data}}' ? new Date().toLocaleDateString() : v); }
+    },
+    // painel livre: você monta o HTML do painel
+    marca: {
+      title: 'Cores da marca', icon: '<b style="color:#c00">A</b>',
+      panel: function (ed, pop, close) {
+        ['#c0392b', '#27ae60', '#2980b9', '#8e44ad'].forEach(function (cor) {
+          var b = document.createElement('button');
+          b.type = 'button'; b.style.cssText = 'width:26px;height:26px;margin:2px;border:1px solid #999;background:' + cor;
+          b.onmousedown = function (e) { e.preventDefault(); };          // mantém a seleção do editor
+          b.onclick = function () { close(); ed.inlineStyle('color', cor); };
+          pop.appendChild(b);
+        });
+      }
+    },
+    // botão simples com estado ativo
+    carimbo: {
+      title: 'Inserir carimbo "APROVADO"', icon: '✅',
+      exec: function (ed) { ed.insertHtml('<span style="border:2px solid #27ae60;color:#27ae60;padding:2px 8px;font-weight:bold">APROVADO</span>&nbsp;'); }
+    }
+  }
+});
+
+/* ---------------- 2: upload ---------------- */
+var e2 = GWBMEditor.replace('e2', { toolbar: 'medium', height: 260, uploadUrl: 'upload.php', uploadField: 'upload' });
+/* Alternativa sem servidor próprio: onUpload(file, callback)
+   onUpload: function (file, done) { meuEnvio(file).then(function (url) { done(url); }); } */
+
+/* ---------------- 3: documento completo ---------------- */
+var e3 = GWBMEditor.replace('e3', { toolbar: 'full', height: 300, fullPage: true });
+
+/* ---------------- 4: eventos ---------------- */
+var logEl = document.getElementById('log');
+function log(t) { logEl.textContent += t + '\n'; logEl.scrollTop = logEl.scrollHeight; }
+var e4 = GWBMEditor.replace('e4', { toolbar: 'medium', height: 200, on: { ready: function () { log('ready'); } } });
+e4.on('change', function () {
+  var n = e4.getText().length;
+  document.getElementById('c4').textContent = n + ' / 200 caracteres  ';
+  if (n > 200) { e4.undo(); log('limite excedido: desfeito'); }
+});
+e4.on('modeChange', function (m) { log('modo: ' + m); });
+e4.on('focus', function () { log('focus'); });
+e4.on('blur', function () { log('blur'); });
+
+/* ---------------- 5: modelos e CSS ---------------- */
+var e5 = GWBMEditor.replace('e5', {
+  toolbar: [['templates', 'format'], ['bold', 'italic'], ['table', 'image'], ['source']],
+  height: 280,
+  placeholder: 'Use o botão “Modelos”…',
+  contentStyle: 'body{font:16px/1.7 Georgia,serif;max-width:720px;margin:auto} h2{color:#7a1f1f;border-bottom:2px solid #7a1f1f} .nota{background:#eef6ff;border-left:4px solid #2563eb;padding:8px 12px}',
+  // contentCss: ['/css/site.css'],   // folhas de estilo reais do seu site
+  templates: [
+    { title: 'Artigo', description: 'Título + resumo + corpo', html: '<h2>Título do artigo</h2><p><i>Resumo em uma linha.</i></p><p>Corpo do texto…</p>' },
+    { title: 'Nota', description: 'Caixa de destaque azul', html: '<div class="nota"><b>Nota:</b> escreva aqui.</div>' },
+    { title: 'Assinatura', description: 'Bloco de assinatura', html: '<p>Atenciosamente,</p><p><b>Seu Nome</b><br>Cargo — Empresa<br>(00) 0000-0000</p>' }
+  ]
+});
+
+/* ---------------- 6: fetch + dirty + live preview ---------------- */
+var e6 = GWBMEditor.replace('e6', { toolbar: 'medium', height: 200 });
+var live = document.getElementById('live');
+function updLive() { live.srcdoc = '<body style="font:14px Arial">' + e6.getData(); }
+e6.on('ready', updLive); e6.on('change', function () { clearTimeout(updLive.t); updLive.t = setTimeout(updLive, 300); });
+window.addEventListener('beforeunload', function (ev) { if (e6.isDirty()) { ev.preventDefault(); ev.returnValue = ''; } });
+document.getElementById('b6').onclick = function () {
+  var fd = new FormData(); fd.append('conteudo', e6.getData());
+  // troque a URL pelo seu endpoint; aqui apenas simulamos
+  document.getElementById('s6').textContent = 'Enviando ' + e6.getData().length + ' bytes…';
+  setTimeout(function () { document.getElementById('s6').textContent = 'Enviado (simulado).'; e6.resetDirty(); }, 600);
+  // fetch('salvar.php', { method: 'POST', body: fd }).then(r => r.json()).then(...)
+};
+
+/* ---------------- 7 ---------------- */
+var e7 = GWBMEditor.replace('e7', { toolbar: 'medium', language: 'en', theme: 'dark', height: 200 });
+</script>
+</body>
+</html>
